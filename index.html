@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -160,7 +159,7 @@
 
             <!-- New Gemini Feature: Character Evaluation -->
             <div class="my-10 p-6 bg-gray-900/70 border border-gray-700 rounded-lg">
-                <h2 class="text-center text-2xl text-red-400 mb-4">Évaluation Automatique par IA</h2>
+                <h2 class="text-center text-2xl text-red-400 mb-4">Evaluation statistique de votre personnage de fiction :</h2>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
                     <input type="text" id="char-input" placeholder="Ex: Superman, Goku, Naruto..." class="bg-gray-700 text-white border-2 border-gray-600 rounded-lg p-3 focus:border-red-500 focus:outline-none flex-grow">
                     <button id="evaluate-char-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 shadow-lg shadow-red-900/50 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -361,7 +360,7 @@
             async function generateCharacterImage(characterName) {
                 const prompt = `Photorealistic, highly detailed portrait of ${characterName} from pop culture, cinematic lighting, epic, facing forward.`;
                 const payload = { instances: [{ prompt: prompt }], parameters: { "sampleCount": 1} };
-                const apiKey = ""; 
+                const apiKey = "AIzaSyBx6GpN6MsHjrQ8Cvsp6bNpDuoHyQtczbQ"; 
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
                 
                 try {
@@ -400,9 +399,18 @@
                 evalError.classList.add('hidden');
                 characterResultContainer.classList.add('hidden');
 
-                const userPrompt = `Analyse le personnage de fiction "${characterName}". Fournis une évaluation de ses capacités sur une échelle de 0 à 100 pour les attributs suivants: FORCE, VIGUEUR, VITESSE, INTELLIGENCE, FURTIVITÉ, ACCESSOIRES. Pour chaque attribut, fournis une brève justification (en français) basée sur des faits réels de l'oeuvre à laquelle il appartient. Fournis également un nom simple en anglais pour le personnage à utiliser dans une URL d'image. Réponds uniquement avec un objet JSON.`;
-                const systemPrompt = "Tu es un expert en pop culture et jeux vidéo. Ta tâche est d'évaluer objectivement des personnages de fiction et de renvoyer les données dans un format JSON strict, sans texte supplémentaire.";
-                const apiKey = "";
+                const userPrompt = `Évalue le personnage de fiction "${characterName}" sur une échelle de 0 à 100 pour les attributs suivants: FORCE, VIGUEUR, VITESSE, INTELLIGENCE, FURTIVITÉ, ACCESSOIRES. Pour chaque attribut, fournis une brève justification (en français) basée sur des faits réels de l'oeuvre à laquelle il appartient. Fournis également un nom simple en anglais pour le personnage à utiliser dans une URL d'image. Réponds uniquement avec un objet JSON.`;
+                const systemPrompt = `Tu es un expert en pop culture et jeux vidéo. Ta tâche est d'évaluer objectivement des personnages de fiction et de renvoyer les données dans un format JSON strict, sans texte supplémentaire.
+
+Pour assurer la cohérence, suis attentivement cette échelle de puissance :
+- 1-20 : Niveau d'un humain normal, sans entraînement particulier.
+- 21-50 : Niveau d'un humain au sommet de sa forme (athlète olympique, soldat d'élite). Un humain normal ne peut PAS dépasser 50.
+- 51-75 : Niveau surhumain léger à modéré. Par exemple, un personnage utilisant des armes à feu conventionnelles ne devrait pas dépasser 75 dans la catégorie ACCESSOIRES.
+- 76-90 : Niveau de puissance très élevé, capable d'affecter des villes entières.
+- 91-100 : Niveau cosmique, divin ou de puissance extrême, capable de détruire des planètes ou de manipuler la réalité.
+
+Applique cette logique à TOUS les attributs pour que la comparaison entre un personnage comme Batman et un autre comme Goku soit juste et cohérente.`;
+                const apiKey = "VOTRE_CLE_API_ICI";
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
                 const payload = {
@@ -560,4 +568,7 @@
     </script>
 </body>
 </html>
+
+
+
 
