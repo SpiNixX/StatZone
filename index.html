@@ -361,7 +361,7 @@
                 const prompt = `Photorealistic, highly detailed portrait of ${characterName} from pop culture, cinematic lighting, epic, facing forward.`;
                 const payload = { instances: [{ prompt: prompt }], parameters: { "sampleCount": 1} };
                 const apiKey = "AIzaSyAv3h5jeo_Pa6DHI3OGZwedeQGtbzH7EpU"; 
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${AIzaSyAv3h5jeo_Pa6DHI3OGZwedeQGtbzH7EpU}`;
                 
                 try {
                     const response = await fetchWithRetry(apiUrl, {
@@ -411,7 +411,7 @@ Pour assurer la cohérence, suis attentivement cette échelle de puissance :
 
 Applique cette logique à TOUS les attributs pour que la comparaison entre un personnage comme Batman et un autre comme Goku soit juste et cohérente.`;
                 const apiKey = "AIzaSyAv3h5jeo_Pa6DHI3OGZwedeQGtbzH7EpU";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${AIzaSyAv3h5jeo_Pa6DHI3OGZwedeQGtbzH7EpU}`;
 
                 const payload = {
                     contents: [{ parts: [{ text: userPrompt }] }],
