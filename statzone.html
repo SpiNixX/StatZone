@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StatZone - Évaluateur de statistiques</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?Russo+One&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Russo One', sans-serif;
+            background-color: #1a1a1a;
+        }
+        /* Custom styles for range inputs */
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #4b5563; /* gray-600 */
+            border-radius: 5px;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+        }
+        input[type=range]:hover {
+            opacity: 1;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #ef4444; /* red-500 */
+            border: 2px solid #f9fafb; /* gray-50 */
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        input[type=range]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #ef4444; /* red-500 */
+            border: 2px solid #f9fafb; /* gray-50 */
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .stat-label {
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        .title-glitch {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #f9fafb;
+            position: relative;
+            text-shadow: 0 0 5px #ef4444, 0 0 10px #ef4444;
+        }
+        .title-glitch:before,
+        .title-glitch:after {
+            content: "STATZONE";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a1a;
+            overflow: hidden;
+        }
+        .title-glitch:before {
+            left: 2px;
+            text-shadow: -2px 0 #dc2626; /* red-600 */
+            animation: glitch-anim-1 2s infinite linear alternate-reverse;
+        }
+        .title-glitch:after {
+            left: -2px;
+            text-shadow: -2px 0 #991b1b, 2px 2px #ef4444; /* red-800, red-500 */
+            animation: glitch-anim-2 2s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-anim-1 {
+            0% { clip: rect(25px, 9999px, 99px, 0); }
+            25% { clip: rect(81px, 9999px, 3px, 0); }
+            50% { clip: rect(43px, 9999px, 7px, 0); }
+            75% { clip: rect(15px, 9999px, 91px, 0); }
+            100% { clip: rect(69px, 9999px, 57px, 0); }
+        }
+        @keyframes glitch-anim-2 {
+            0% { clip: rect(8px, 9999px, 78px, 0); }
+            25% { clip: rect(91px, 9999px, 83px, 0); }
+            50% { clip: rect(4px, 9999px, 14px, 0); }
+            75% { clip: rect(51px, 9999px, 94px, 0); }
+            100% { clip: rect(87px, 9999px, 49px, 0); }
+        }
+        .lds-dual-ring {
+            display: inline-block;
+            width: 80px;
+            height: 80px;
+        }
+        .lds-dual-ring:after {
+            content: " ";
+            display: block;
+            width: 64px;
+            height: 64px;
+            margin: 8px;
+            border-radius: 50%;
+            border: 6px solid #ef4444;
+            border-color: #ef4444 transparent #ef4444 transparent;
+            animation: lds-dual-ring 1.2s linear infinite;
+        }
+        @keyframes lds-dual-ring {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        .image-container {
+            position: relative;
+            width: 100%;
+            max-width: 448px; /* max-w-md */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .image-loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 26, 26, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 0.5rem; /* rounded-lg */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-50 flex flex-col items-center min-h-screen p-4">
+
+    <div class="w-full max-w-6xl mx-auto bg-gray-800 bg-opacity-50 border-2 border-red-500/50 rounded-2xl shadow-2xl shadow-red-900/50 p-6 md:p-8">
+        
+        <header class="text-center mb-8">
+            <h1 class="title-glitch">STATZONE</h1>
+            <p class="text-red-400 mt-2">Évaluez et visualisez les statistiques de votre personnage</p>
+        </header>
+
+        <main>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
+                <!-- Radar Chart -->
+                <div class="w-full aspect-square flex items-center justify-center">
+                    <canvas id="radarChart"></canvas>
+                </div>
+
+                <!-- Stats Sliders -->
+                <div id="stats-controls" class="space-y-5">
+                    <!-- Les contrôles seront injectés ici par JavaScript -->
+                </div>
+            </div>
+
+            <!-- New Gemini Feature: Character Evaluation -->
+            <div class="my-10 p-6 bg-gray-900/70 border border-gray-700 rounded-lg">
+                <h2 class="text-center text-2xl text-red-400 mb-4">Évaluation Automatique par IA</h2>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <input type="text" id="char-input" placeholder="Ex: Superman, Goku, Naruto..." class="bg-gray-700 text-white border-2 border-gray-600 rounded-lg p-3 focus:border-red-500 focus:outline-none flex-grow">
+                    <button id="evaluate-char-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 shadow-lg shadow-red-900/50 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+                        🤖 Évaluer le Personnage
+                    </button>
+                </div>
+                <div id="evaluation-loader" class="text-center mt-4 hidden">
+                    <div class="lds-dual-ring"></div>
+                    <p class="text-gray-400">Analyse en cours...</p>
+                </div>
+                 <p id="eval-error" class="text-center text-yellow-400 mt-4 hidden"></p>
+            </div>
+
+            <!-- Character Evaluation Result -->
+            <div id="character-result-container" class="mt-10 text-center hidden">
+                <div class="image-container mb-4">
+                    <img id="character-image" src="https://placehold.co/400x300/1a1a1a/ef4444?text=IMAGE" alt="Image du personnage" class="mx-auto rounded-lg border-4 border-red-500 w-full object-cover">
+                    <div id="image-loader-overlay" class="image-loader hidden">
+                        <div class="lds-dual-ring"></div>
+                    </div>
+                </div>
+                <p class="text-2xl text-white">Note Générale</p>
+                <p id="general-score" class="text-5xl font-bold text-red-400">0</p>
+                <div id="stats-justification" class="mt-6 text-left max-w-md mx-auto space-y-3">
+                    <!-- Justifications will be added here by JS -->
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Elements ---
+            const canvas = document.getElementById('radarChart');
+            const ctx = canvas.getContext('2d');
+            const controlsContainer = document.getElementById('stats-controls');
+            // Character Evaluation elements
+            const charInput = document.getElementById('char-input');
+            const evaluateCharBtn = document.getElementById('evaluate-char-btn');
+            const evaluationLoader = document.getElementById('evaluation-loader');
+            const evalError = document.getElementById('eval-error');
+            const characterResultContainer = document.getElementById('character-result-container');
+            const characterImage = document.getElementById('character-image');
+            const imageLoaderOverlay = document.getElementById('image-loader-overlay');
+            const generalScore = document.getElementById('general-score');
+
+
+            // --- State ---
+            const stats = [
+                { name: 'FORCE', value: 50 },
+                { name: 'VIGUEUR', value: 50 },
+                { name: 'VITESSE', value: 50 },
+                { name: 'INTELLIGENCE', value: 50 },
+                { name: 'FURTIVITÉ', value: 50 },
+                { name: 'ACCESSOIRES', value: 50 }
+            ];
+            const numAttributes = stats.length;
+            let size, radius, centerX, centerY;
+
+            // --- UI Generation ---
+            function createControls() {
+                 stats.forEach((stat, index) => {
+                    const controlDiv = document.createElement('div');
+                    controlDiv.className = 'grid grid-cols-4 items-center gap-4';
+
+                    const label = document.createElement('label');
+                    label.htmlFor = `stat-${index}`;
+                    label.className = 'col-span-1 text-sm md:text-base text-gray-300 stat-label';
+                    label.textContent = stat.name;
+                    
+                    const slider = document.createElement('input');
+                    slider.type = 'range';
+                    slider.id = `stat-${index}`;
+                    slider.min = 0;
+                    slider.max = 100;
+                    slider.value = stat.value;
+                    slider.className = 'col-span-2';
+                    
+                    const valueDisplay = document.createElement('span');
+                    valueDisplay.id = `value-${index}`;
+                    valueDisplay.className = 'col-span-1 text-center text-lg md:text-xl font-bold text-red-400';
+                    valueDisplay.textContent = stat.value;
+                    
+                    slider.addEventListener('input', (e) => {
+                        stats[index].value = parseInt(e.target.value, 10);
+                        valueDisplay.textContent = e.target.value;
+                        drawChart();
+                    });
+
+                    controlDiv.appendChild(label);
+                    controlDiv.appendChild(slider);
+                    controlDiv.appendChild(valueDisplay);
+                    controlsContainer.appendChild(controlDiv);
+                });
+            }
+
+            // --- Canvas Drawing ---
+            function resizeCanvas() {
+                const container = canvas.parentElement;
+                const containerSize = Math.min(container.clientWidth, container.clientHeight);
+                canvas.width = containerSize;
+                canvas.height = containerSize;
+                size = canvas.width;
+                centerX = size / 2;
+                centerY = size / 2;
+                radius = size * 0.35;
+                drawChart();
+            }
+
+            function drawGrid() {
+                ctx.strokeStyle = "rgba(239, 68, 68, 0.3)";
+                ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+                ctx.font = `${size * 0.04}px 'Russo One'`;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                for (let i = 0; i < numAttributes; i++) {
+                    const angle = (Math.PI * 2 / numAttributes) * i - Math.PI / 2;
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY);
+                    const xEnd = centerX + radius * Math.cos(angle);
+                    const yEnd = centerY + radius * Math.sin(angle);
+                    ctx.lineTo(xEnd, yEnd);
+                    ctx.stroke();
+                    const labelX = centerX + (radius * 1.2) * Math.cos(angle);
+                    const labelY = centerY + (radius * 1.2) * Math.sin(angle);
+                    ctx.fillText(stats[i].name, labelX, labelY);
+                }
+                ctx.lineWidth = 1;
+                [0.25, 0.5, 0.75, 1].forEach(scale => {
+                    ctx.beginPath();
+                    for (let i = 0; i <= numAttributes; i++) {
+                        const angle = (Math.PI * 2 / numAttributes) * i - Math.PI / 2;
+                        const x = centerX + radius * scale * Math.cos(angle);
+                        const y = centerY + radius * scale * Math.sin(angle);
+                        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                    }
+                    ctx.closePath();
+                    ctx.stroke();
+                });
+            }
+
+            function drawStatsPolygon() {
+                ctx.beginPath();
+                stats.forEach((stat, i) => {
+                    const angle = (Math.PI * 2 / numAttributes) * i - Math.PI / 2;
+                    const currentRadius = (stat.value / 100) * radius;
+                    const x = centerX + currentRadius * Math.cos(angle);
+                    const y = centerY + currentRadius * Math.sin(angle);
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                });
+                ctx.closePath();
+                const gradient = ctx.createLinearGradient(0, 0, 0, size);
+                gradient.addColorStop(0, 'rgba(220, 38, 38, 0.7)');
+                gradient.addColorStop(1, 'rgba(153, 27, 27, 0.7)');
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                stats.forEach((stat, i) => {
+                    const angle = (Math.PI * 2 / numAttributes) * i - Math.PI / 2;
+                    const currentRadius = (stat.value / 100) * radius;
+                    const x = centerX + currentRadius * Math.cos(angle);
+                    const y = centerY + currentRadius * Math.sin(angle);
+                    ctx.beginPath();
+                    ctx.arc(x, y, size * 0.01, 0, Math.PI * 2);
+                    ctx.fillStyle = "#fff";
+                    ctx.fill();
+                });
+            }
+
+            function drawChart() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawGrid();
+                drawStatsPolygon();
+            }
+
+            // --- Gemini API ---
+            async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
+                 for (let i = 0; i < retries; i++) {
+                    try {
+                        const response = await fetch(url, options);
+                        if (!response.ok) {
+                            if (response.status >= 500 && response.status < 600) {
+                                throw new Error(`Server error: ${response.status}`);
+                            }
+                            return response; 
+                        }
+                        return response;
+                    } catch (error) {
+                        if (i === retries - 1) throw error;
+                        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+                    }
+                }
+            }
+            
+            async function generateCharacterImage(characterName) {
+                const prompt = `Photorealistic, highly detailed portrait of ${characterName} from pop culture, cinematic lighting, epic, facing forward.`;
+                const payload = { instances: [{ prompt: prompt }], parameters: { "sampleCount": 1} };
+                const apiKey = ""; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+                
+                try {
+                    const response = await fetchWithRetry(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error(`Image API error: ${response.status}`);
+                    const result = await response.json();
+                    if (result.predictions && result.predictions[0]?.bytesBase64Encoded) {
+                        return `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+                    } else {
+                        throw new Error("No image data in API response.");
+                    }
+                } catch (error) {
+                    console.error("Error generating image:", error);
+                    return `https://placehold.co/400x300/1a1a1a/ef4444?text=Erreur+Image`;
+                }
+            }
+
+
+            // --- Feature: Character Evaluation ---
+            async function evaluateCharacter() {
+                const characterName = charInput.value.trim();
+                if (!characterName) {
+                    evalError.textContent = "Veuillez entrer un nom de personnage.";
+                    evalError.classList.remove('hidden');
+                    return;
+                }
+                
+                // UI state: loading
+                evaluateCharBtn.disabled = true;
+                charInput.disabled = true;
+                evaluationLoader.classList.remove('hidden');
+                evalError.classList.add('hidden');
+                characterResultContainer.classList.add('hidden');
+
+                const userPrompt = `Analyse le personnage de fiction "${characterName}". Fournis une évaluation de ses capacités sur une échelle de 0 à 100 pour les attributs suivants: FORCE, VIGUEUR, VITESSE, INTELLIGENCE, FURTIVITÉ, ACCESSOIRES. Pour chaque attribut, fournis une brève justification (en français) basée sur des faits réels de l'oeuvre à laquelle il appartient. Fournis également un nom simple en anglais pour le personnage à utiliser dans une URL d'image. Réponds uniquement avec un objet JSON.`;
+                const systemPrompt = "Tu es un expert en pop culture et jeux vidéo. Ta tâche est d'évaluer objectivement des personnages de fiction et de renvoyer les données dans un format JSON strict, sans texte supplémentaire.";
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userPrompt }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                "stats": {
+                                    type: "OBJECT",
+                                    properties: {
+                                        "FORCE": { type: "OBJECT", properties: { "value": { "type": "NUMBER" }, "justification": { "type": "STRING" } } },
+                                        "VIGUEUR": { type: "OBJECT", properties: { "value": { "type": "NUMBER" }, "justification": { "type": "STRING" } } },
+                                        "VITESSE": { type: "OBJECT", properties: { "value": { "type": "NUMBER" }, "justification": { "type": "STRING" } } },
+                                        "INTELLIGENCE": { type: "OBJECT", properties: { "value": { "type": "NUMBER" }, "justification": { "type": "STRING" } } },
+                                        "FURTIVITÉ": { type: "OBJECT", properties: { "value": { "type": "NUMBER" }, "justification": { "type": "STRING" } } },
+                                        "ACCESSOIRES": { type: "OBJECT", properties: { "value": { "type": "NUMBER" }, "justification": { "type": "STRING" } } }
+                                    },
+                                }, "imageName": { "type": "STRING", "description": "Simple English name for image search" }
+                            }, required: ["stats", "imageName"]
+                        }
+                    }
+                };
+
+                try {
+                    const response = await fetchWithRetry(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (!response.ok) throw new Error(`API error: ${response.status}`);
+                    
+                    const result = await response.json();
+                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (!text) throw new Error("Réponse de l'API vide.");
+                    
+                    const parsedResult = JSON.parse(text);
+                    
+                    // Display results and start animations/image generation
+                    displayResults(parsedResult);
+                    const animationPromise = animateAllSliders(parsedResult.stats);
+                    const imagePromise = generateCharacterImage(parsedResult.imageName);
+                    
+                    // Await both processes
+                    const imageUrl = await imagePromise;
+                    characterImage.src = imageUrl;
+                    imageLoaderOverlay.classList.add('hidden');
+                    
+                    await animationPromise;
+
+
+                } catch (error) {
+                    console.error("Error calling Gemini API for evaluation:", error);
+                    evalError.textContent = "Impossible d'évaluer ce personnage. Essayez-en un autre.";
+                    evalError.classList.remove('hidden');
+                } finally {
+                    evaluateCharBtn.disabled = false;
+                    charInput.disabled = false;
+                    evaluationLoader.classList.add('hidden');
+                }
+            }
+
+            function animateSlider(slider, valueDisplay, statIndex, targetValue) {
+                return new Promise(resolve => {
+                    const startValue = parseInt(slider.value, 10);
+                    const diff = targetValue - startValue;
+                    if (diff === 0) return resolve();
+                    
+                    const duration = 1500; // Slowed down animation
+                    const stepTime = 15;
+                    const totalSteps = duration / stepTime;
+                    const increment = diff / totalSteps;
+                    let currentValue = startValue;
+
+                    const interval = setInterval(() => {
+                        currentValue += increment;
+                        if ((increment > 0 && currentValue >= targetValue) || (increment < 0 && currentValue <= targetValue)) {
+                            currentValue = targetValue;
+                            clearInterval(interval);
+                            resolve();
+                        }
+                        const intValue = Math.round(currentValue);
+                        slider.value = intValue;
+                        valueDisplay.textContent = intValue;
+                        stats[statIndex].value = intValue;
+                        drawChart();
+                    }, stepTime);
+                });
+            }
+
+            async function animateAllSliders(newStats) {
+                const sliders = controlsContainer.querySelectorAll('input[type=range]');
+                const valueDisplays = controlsContainer.querySelectorAll('span[id^=value-]');
+                const animationPromises = [];
+                for (let i = 0; i < stats.length; i++) {
+                    const statName = stats[i].name;
+                    const targetValue = newStats[statName]?.value;
+                    if (targetValue !== undefined) {
+                        animationPromises.push(animateSlider(sliders[i], valueDisplays[i], i, targetValue));
+                    }
+                }
+                await Promise.all(animationPromises);
+            }
+
+            function displayJustifications(newStats) {
+                const container = document.getElementById('stats-justification');
+                container.innerHTML = ''; // Clear previous justifications
+
+                stats.forEach(statInfo => {
+                    const statName = statInfo.name;
+                    const statData = newStats[statName];
+
+                    if (statData) {
+                        const justificationDiv = document.createElement('div');
+                        justificationDiv.className = 'p-3 bg-gray-700/50 rounded-lg border border-gray-600';
+                        
+                        const title = document.createElement('p');
+                        title.className = 'font-bold text-red-400';
+                        title.textContent = `${statName}: ${statData.value}`;
+                        
+                        const text = document.createElement('p');
+                        text.className = 'text-gray-300 text-sm mt-1';
+                        text.textContent = statData.justification;
+                        
+                        justificationDiv.appendChild(title);
+                        justificationDiv.appendChild(text);
+                        container.appendChild(justificationDiv);
+                    }
+                });
+            }
+
+            function displayResults(parsedResult) {
+                const newStats = parsedResult.stats;
+                const total = Object.values(newStats).reduce((sum, stat) => sum + stat.value, 0);
+                const average = Math.round(total / stats.length);
+                generalScore.textContent = average;
+                
+                // Show loading state for image
+                imageLoaderOverlay.classList.remove('hidden');
+                characterImage.src = `https://placehold.co/400x300/1a1a1a/ef4444?text=G%C3%A9n%C3%A9ration...`;
+                characterImage.alt = `Génération d'une image de ${parsedResult.imageName}`;
+                
+                displayJustifications(newStats);
+                
+                characterResultContainer.classList.remove('hidden');
+            }
+            
+            // --- Initialization ---
+            createControls();
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+            evaluateCharBtn.addEventListener('click', evaluateCharacter);
+            charInput.addEventListener('keypress', (e) => {
+                if(e.key === 'Enter') evaluateCharBtn.click();
+            });
+        });
+    </script>
+</body>
+</html>
+
