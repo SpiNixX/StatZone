@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -294,7 +294,7 @@ Pour noter, utilise cette échelle de puissance OBLIGATOIRE pour assurer la coh�
 
 Applique cette logique à TOUS les attributs pour que la comparaison entre un personnage comme Batman et un autre comme Goku soit juste et cohérente.`;
                 const apiKey = "AIzaSyAv3h5jeo_Pa6DHI3OGZwedeQGtbzH7EpU";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
 
                 const payload = {
                     contents: [{ parts: [{ text: userPrompt }] }],
@@ -452,3 +452,4 @@ Applique cette logique à TOUS les attributs pour que la comparaison entre un pe
     </script>
 </body>
 </html>
+
