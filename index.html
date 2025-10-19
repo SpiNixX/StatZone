@@ -1,453 +1,211 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StatZone - Évaluateur de statistiques</title>
+    <title>StatZone - Évaluateur d'Attributs</title>
+    <!-- Tailwind CSS pour le style -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js pour le graphique radar -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Police "Exo 2" de Google Fonts pour un look "gaming" -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,400;0,600;0,700;1,700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #1a1a1a;
-            color: #e0e0e0;
+            font-family: 'Exo 2', sans-serif;
+            background: #111; /* Fond plus sombre */
         }
-        .stat-slider::-webkit-slider-thumb {
+        /* Style personnalisé pour les curseurs */
+        input[type="range"] {
             -webkit-appearance: none;
             appearance: none;
-            width: 20px;
-            height: 20px;
-            background: #ef4444;
+            width: 100%;
+            height: 6px;
+            background: #4b0000; /* Rouge très sombre */
+            border-radius: 3px;
+            outline: none;
+            transition: background .2s;
+        }
+        input[type="range"]:hover {
+            background: #7f0000;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            background: #ef4444; /* red-500 */
             cursor: pointer;
             border-radius: 50%;
-            border: 2px solid #1a1a1a;
+            border: 2px solid #111;
+            box-shadow: 0 0 10px #ef4444;
         }
-        .stat-slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            background: #ef4444;
+        input[type="range"]::-moz-range-thumb {
+            width: 22px;
+            height: 22px;
+            background: #ef4444; /* red-500 */
             cursor: pointer;
             border-radius: 50%;
-             border: 2px solid #1a1a1a;
-        }
-        .glitch {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 4rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            position: relative;
-            text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75), -0.025em -0.05em 0 rgba(0, 255, 0, 0.75), 0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
-            animation: glitch 500ms infinite;
-        }
-        @keyframes glitch {
-            0% { text-shadow: 0.05em 0 0 rgba(255,0,0,.75), -0.025em -0.05em 0 rgba(0,255,0,.75), 0.025em 0.05em 0 rgba(0,0,255,.75); }
-            14% { text-shadow: 0.05em 0 0 rgba(255,0,0,.75), -0.025em -0.05em 0 rgba(0,255,0,.75), 0.025em 0.05em 0 rgba(0,0,255,.75); }
-            15% { text-shadow: -0.05em -0.025em 0 rgba(255,0,0,.75), 0.025em 0.025em 0 rgba(0,255,0,.75), -0.05em -0.05em 0 rgba(0,0,255,.75); }
-            49% { text-shadow: -0.05em -0.025em 0 rgba(255,0,0,.75), 0.025em 0.025em 0 rgba(0,255,0,.75), -0.05em -0.05em 0 rgba(0,0,255,.75); }
-            50% { text-shadow: 0.025em 0.05em 0 rgba(255,0,0,.75), 0.05em 0 0 rgba(0,255,0,.75), 0 -0.05em 0 rgba(0,0,255,.75); }
-            99% { text-shadow: 0.025em 0.05em 0 rgba(255,0,0,.75), 0.05em 0 0 rgba(0,255,0,.75), 0 -0.05em 0 rgba(0,0,255,.75); }
-            100% { text-shadow: -0.025em 0 0 rgba(255,0,0,.75), -0.025em -0.025em 0 rgba(0,255,0,.75), -0.025em -0.05em 0 rgba(0,0,255,.75); }
-        }
-        .card {
-            background-color: #2a2a2a;
-            border: 1px solid #ef4444;
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
-        }
-        .label-text {
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-        }
-        .btn-eval {
-            font-family: 'Orbitron', sans-serif;
-            background-color: #ef4444;
-            color: #1a1a1a;
-            border: none;
-            transition: all 0.3s ease;
-        }
-        .btn-eval:hover {
-            background-color: #f87171;
-            box-shadow: 0 0 20px rgba(248, 113, 113, 0.6);
-        }
-        .btn-eval:disabled {
-            background-color: #7f1d1d;
-            cursor: not-allowed;
+            border: 2px solid #111;
+            box-shadow: 0 0 10px #ef4444;
         }
     </style>
 </head>
-<body class="min-h-screen p-4 sm:p-8">
-    <div class="container mx-auto max-w-7xl">
-        <header class="text-center my-8">
-            <h1 class="glitch">STATZONE</h1>
-            <p class="text-gray-400">Évaluez et comparez les statistiques de n'importe quel personnage</p>
-        </header>
+<body class="bg-black text-gray-200 flex items-center justify-center min-h-screen p-4">
 
-        <main class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-            <!-- Colonne des contrôles -->
-            <div class="card rounded-lg p-6">
-                 <div class="mb-6">
-                    <label for="char-input" class="block label-text text-lg mb-2">Personnage de fiction :</label>
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <input type="text" id="char-input" class="flex-grow bg-gray-800 border border-gray-600 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Ex: Superman, Harry Potter, Goku...">
-                        <button id="evaluate-char-btn" class="btn-eval font-bold py-2 px-6 rounded-md">Évaluer</button>
-                    </div>
-                     <p id="eval-error" class="text-red-400 mt-2 text-sm hidden"></p>
-                </div>
+    <div class="w-full max-w-5xl bg-neutral-900/70 backdrop-blur-sm border border-red-600/50 rounded-2xl shadow-2xl shadow-red-900/50 p-6 md:p-8">
+        <h1 class="text-4xl md:text-5xl font-bold text-center mb-2 text-red-500 tracking-widest uppercase" style="text-shadow: 0 0 8px rgba(239, 68, 68, 0.7);">StatZone</h1>
+        <p class="text-center text-gray-400 mb-8">Analysez les compétences de votre champion.</p>
 
-                <div id="stats-controls" class="space-y-4">
-                    <!-- Les sliders seront injectés ici par le JS -->
-                </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
+            
+            <!-- Colonne du Graphique -->
+            <div class="w-full h-full min-h-[300px] md:min-h-[400px]">
+                <canvas id="attributeChart"></canvas>
             </div>
 
-            <!-- Colonne du graphique -->
-            <div class="card rounded-lg p-6 flex flex-col items-center">
-                 <div id="loading-indicator" class="text-center my-4 hidden">
-                    <svg class="animate-spin h-8 w-8 text-red-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <p class="mt-2 label-text text-lg"></p>
-                </div>
-                
-                <div id="results-container" class="w-full text-center hidden">
-                     <div id="character-image-container" class="mb-4 flex justify-center items-center h-64 bg-gray-900 rounded-lg">
-                        <!-- L'image générée sera insérée ici -->
-                     </div>
-                     <div id="general-score-container" class="mb-4">
-                         <h3 class="label-text text-2xl text-red-400">NOTE GÉNÉRALE</h3>
-                         <p id="general-score" class="text-5xl font-bold"></p>
-                     </div>
-                </div>
-
-                <div class="w-full max-w-md">
-                    <canvas id="statsChart"></canvas>
-                </div>
-
-                <div id="explanation-container" class="mt-6 w-full hidden">
-                    <h3 class="label-text text-xl mb-3 text-center">Evaluation statistique de votre personnage de fiction :</h3>
-                    <div id="explanation-content" class="text-left bg-gray-800/50 p-4 rounded-md space-y-2 text-gray-300">
-                        <!-- Le texte d'explication sera injecté ici -->
+            <!-- Colonne des Contrôles -->
+            <div class="space-y-6">
+                <!-- Attribut: Force -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label for="force" class="font-semibold text-lg uppercase">Force</label>
+                        <span id="forceValue" class="text-lg font-bold bg-red-600 text-white px-4 py-1 rounded-md shadow-md shadow-red-900/50">50</span>
                     </div>
+                    <input type="range" id="force" min="0" max="100" value="50" class="attribute-slider" data-index="0">
+                </div>
+                <!-- Attribut: Vigueur -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label for="vigueur" class="font-semibold text-lg uppercase">Vigueur</label>
+                        <span id="vigueurValue" class="text-lg font-bold bg-red-600 text-white px-4 py-1 rounded-md shadow-md shadow-red-900/50">50</span>
+                    </div>
+                    <input type="range" id="vigueur" min="0" max="100" value="50" class="attribute-slider" data-index="1">
+                </div>
+                <!-- Attribut: Vitesse -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label for="vitesse" class="font-semibold text-lg uppercase">Vitesse</label>
+                        <span id="vitesseValue" class="text-lg font-bold bg-red-600 text-white px-4 py-1 rounded-md shadow-md shadow-red-900/50">50</span>
+                    </div>
+                    <input type="range" id="vitesse" min="0" max="100" value="50" class="attribute-slider" data-index="2">
+                </div>
+                <!-- Attribut: Intelligence -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label for="intelligence" class="font-semibold text-lg uppercase">Intelligence</label>
+                        <span id="intelligenceValue" class="text-lg font-bold bg-red-600 text-white px-4 py-1 rounded-md shadow-md shadow-red-900/50">50</span>
+                    </div>
+                    <input type="range" id="intelligence" min="0" max="100" value="50" class="attribute-slider" data-index="3">
+                </div>
+                <!-- Attribut: Furtivité -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label for="furtivite" class="font-semibold text-lg uppercase">Furtivité</label>
+                        <span id="furtiviteValue" class="text-lg font-bold bg-red-600 text-white px-4 py-1 rounded-md shadow-md shadow-red-900/50">50</span>
+                    </div>
+                    <input type="range" id="furtivite" min="0" max="100" value="50" class="attribute-slider" data-index="4">
+                </div>
+                <!-- Attribut: Accessoires/Capacités -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label for="capacites" class="font-semibold text-lg uppercase">Capacités</label>
+                        <span id="capacitesValue" class="text-lg font-bold bg-red-600 text-white px-4 py-1 rounded-md shadow-md shadow-red-900/50">50</span>
+                    </div>
+                    <input type="range" id="capacites" min="0" max="100" value="50" class="attribute-slider" data-index="5">
                 </div>
             </div>
-        </main>
+        </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const stats = {
-                "Force": 50,
-                "Vitesse": 50,
-                "Vigueur": 50,
-                "Intelligence": 50,
-                "Furtivité": 50,
-                "Accessoires/Capacité": 50
+            const ctx = document.getElementById('attributeChart').getContext('2d');
+            
+            const labels = ['Force', 'Vigueur', 'Vitesse', 'Intelligence', 'Furtivité', 'Capacités'];
+            
+            const chartData = {
+                labels: labels,
+                datasets: [{
+                    label: 'Niveau d\'attribut',
+                    data: [50, 50, 50, 50, 50, 50], // Données initiales
+                    fill: true,
+                    backgroundColor: 'rgba(239, 68, 68, 0.25)', // red-500 avec opacité
+                    borderColor: 'rgb(239, 68, 68)', // red-500
+                    pointBackgroundColor: 'rgb(239, 68, 68)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgb(239, 68, 68)'
+                }]
             };
 
-            const statsControls = document.getElementById('stats-controls');
-            const charInput = document.getElementById('char-input');
-            const evaluateCharBtn = document.getElementById('evaluate-char-btn');
-            const loadingIndicator = document.getElementById('loading-indicator');
-            const loadingText = loadingIndicator.querySelector('p');
-            const resultsContainer = document.getElementById('results-container');
-            const generalScoreEl = document.getElementById('general-score');
-            const generalScoreContainer = document.getElementById('general-score-container');
-            const characterImageContainer = document.getElementById('character-image-container');
-            const evalError = document.getElementById('eval-error');
-            const explanationContainer = document.getElementById('explanation-container');
-            const explanationContent = document.getElementById('explanation-content');
-            
-            // Initialisation du graphique
-            const ctx = document.getElementById('statsChart').getContext('2d');
-            const chart = new Chart(ctx, {
+            const chartConfig = {
                 type: 'radar',
-                data: {
-                    labels: Object.keys(stats),
-                    datasets: [{
-                        label: 'Stats du Personnage',
-                        data: Object.values(stats),
-                        backgroundColor: 'rgba(239, 68, 68, 0.4)',
-                        borderColor: 'rgba(239, 68, 68, 1)',
-                        pointBackgroundColor: 'rgba(239, 68, 68, 1)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(239, 68, 68, 1)'
-                    }]
-                },
+                data: chartData,
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     scales: {
                         r: {
-                            angleLines: { color: 'rgba(255, 255, 255, 0.2)' },
-                            grid: { color: 'rgba(255, 255, 255, 0.2)' },
-                            pointLabels: { 
-                                font: { size: 12, family: "'Orbitron', sans-serif" },
-                                color: '#e0e0e0'
+                            angleLines: {
+                                color: 'rgba(239, 68, 68, 0.2)'
+                            },
+                            grid: {
+                                color: 'rgba(239, 68, 68, 0.2)'
+                            },
+                            pointLabels: {
+                                color: '#fca5a5', // red-300
+                                font: {
+                                    size: 15,
+                                    weight: '600',
+                                    family: "'Exo 2', sans-serif"
+                                }
                             },
                             ticks: {
-                                color: '#1a1a1a',
-                                backdropColor: 'rgba(255, 255, 255, 0.1)',
-                                stepSize: 20,
-                                font: { weight: 'bold' }
+                                display: false, // On cache les chiffres de l'axe
+                                backdropColor: 'rgba(0, 0, 0, 0.5)',
                             },
                             min: 0,
-                            max: 100
+                            max: 100,
                         }
                     },
                     plugins: {
                         legend: {
-                            display: false
+                            display: false 
+                        },
+                        tooltip: {
+                           bodyFont: {
+                               family: "'Exo 2', sans-serif",
+                               weight: '600',
+                           },
+                           titleFont: {
+                                family: "'Exo 2', sans-serif",
+                           }
                         }
                     }
                 }
+            };
+
+            const attributeChart = new Chart(ctx, chartConfig);
+
+            // Gérer la mise à jour des curseurs
+            const sliders = document.querySelectorAll('.attribute-slider');
+            sliders.forEach(slider => {
+                slider.addEventListener('input', (event) => {
+                    const value = event.target.value;
+                    const index = event.target.dataset.index;
+                    
+                    attributeChart.data.datasets[0].data[index] = value;
+                    attributeChart.update();
+                    
+                    const valueDisplay = document.getElementById(`${event.target.id}Value`);
+                    if(valueDisplay) {
+                        valueDisplay.textContent = value;
+                    }
+                });
             });
-
-            // Création des sliders
-            function createSliders() {
-                statsControls.innerHTML = '';
-                for (const stat in stats) {
-                    const value = stats[stat];
-                    const controlDiv = document.createElement('div');
-                    controlDiv.className = 'flex items-center gap-4';
-                    controlDiv.innerHTML = `
-                        <label for="${stat}-slider" class="w-40 label-text">${stat}</label>
-                        <input type="range" id="${stat}-slider" min="0" max="100" value="${value}" class="stat-slider flex-grow appearance-none w-full h-2 bg-gray-700 rounded-lg outline-none" data-stat="${stat}">
-                        <span id="${stat}-value" class="w-12 text-center label-text text-red-400">${value}</span>
-                    `;
-                    statsControls.appendChild(controlDiv);
-                }
-                addSliderListeners();
-            }
-
-            // Mise à jour du graphique et des valeurs
-            function updateChart() {
-                chart.data.datasets[0].data = Object.values(stats);
-                chart.update();
-            }
-            
-            function addSliderListeners() {
-                document.querySelectorAll('.stat-slider').forEach(slider => {
-                    slider.addEventListener('input', (e) => {
-                        const statName = e.target.dataset.stat;
-                        const value = e.target.value;
-                        stats[statName] = parseInt(value, 10);
-                        document.getElementById(`${statName}-value`).textContent = value;
-                        updateChart();
-                    });
-                });
-            }
-            
-            // Retries for API calls
-            async function fetchWithRetry(url, options, retries = 3, backoff = 1000) {
-                for (let i = 0; i < retries; i++) {
-                    try {
-                        const response = await fetch(url, options);
-                        if (!response.ok && response.status === 429) { // Only retry on rate limit
-                            throw new Error('Rate limit');
-                        }
-                        return response;
-                    } catch (error) {
-                        if (i === retries - 1) throw error;
-                        await new Promise(resolve => setTimeout(resolve, backoff * (i + 1)));
-                    }
-                }
-            }
-            
-            async function generateCharacterImage(characterName) {
-                const prompt = `Photorealistic, highly detailed portrait of ${characterName} from pop culture, cinematic lighting, epic, facing forward.`;
-                const payload = { instances: [{ prompt: prompt }], parameters: { "sampleCount": 1} };
-                const apiKey = "AIzaSyAv3h5jeo_Pa6DHI3OGZwedeQGtbzH7EpU"; 
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
-                
-                try {
-                    const response = await fetchWithRetry(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                     if (!response.ok) { throw new Error(`Image API error: ${response.status}`); }
-                    
-                    const result = await response.json();
-                    if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
-                        return `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
-                    }
-                } catch(error) {
-                    console.error("Error generating image:", error);
-                    return "https://placehold.co/512x512/1a1a1a/ef4444?text=?&font=orbitron"; // Fallback image
-                }
-                return "https://placehold.co/512x512/1a1a1a/ef4444?text=?&font=orbitron";
-            }
-
-            async function evaluateCharacterStats(characterName) {
-                const userPrompt = `Analyse le personnage de fiction "${characterName}" et note ses attributs sur 100. Fournis ta réponse au format JSON, sans aucun texte avant ou après. Le JSON doit contenir deux clés : "stats" et "justifications". "stats" est un objet avec les clés suivantes : "Force", "Vitesse", "Vigueur", "Intelligence", "Furtivité", "Accessoires/Capacité". "justifications" est un objet avec les mêmes clés, où chaque valeur est une chaîne expliquant la note basée sur des faits connus de l'œuvre du personnage.
-
-Pour noter, utilise cette échelle de puissance OBLIGATOIRE pour assurer la cohérence :
-- 0-10 : Niveau d'un humain sédentaire ou d'un enfant.
-- 11-30 : Niveau d'un humain athlétique ou entraîné (soldat, athlète olympique).
-- 31-50 : Niveau de "pic humain" dans la fiction (ex: Batman, Captain America sans sérum). C'est la limite absolue pour un humain sans pouvoirs.
-- 51-70 : Niveau surhumain basique (ex: Spider-Man). Peut soulever une voiture, courir plus vite qu'un TGV.
-- 71-90 : Niveau planétaire. Puissance immense, capable de détruire des villes ou de rivaliser avec des entités très puissantes (ex: Superman, Thor). Les armes à feu standards ne dépassent JAMAIS 75.
-- 91-100 : Niveau cosmique, divin ou de puissance extrême, capable de détruire des planètes ou de manipuler la réalité.
-
-Applique cette logique à TOUS les attributs pour que la comparaison entre un personnage comme Batman et un autre comme Goku soit juste et cohérente.`;
-                const apiKey = "AIzaSyAv3h5jeo_Pa6DHI3OGZwedeQGtbzH7EpU";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
-
-                const payload = {
-                    contents: [{ parts: [{ text: userPrompt }] }],
-                    generationConfig: {
-                        responseMimeType: "application/json",
-                    }
-                };
-                
-                const response = await fetchWithRetry(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                 if (!response.ok) {
-                    const errorBody = await response.json().catch(() => ({}));
-                    const errorMessage = errorBody?.error?.message || `API error: ${response.status}`;
-                    console.error("API Response Error:", errorMessage);
-
-                    if (errorMessage.includes("API key not valid")) {
-                       throw new Error("API key not valid");
-                    }
-                     if (errorMessage.includes("permission to access")) {
-                       throw new Error("API permission denied");
-                    }
-                    if (response.status === 400 && errorMessage.includes("billing account")) {
-                        throw new Error("Billing issue");
-                    }
-                    throw new Error(`API error: ${response.status}`);
-                }
-                
-                const result = await response.json();
-                const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (!text) {
-                     throw new Error("La réponse de l'API est vide ou malformée.");
-                }
-                return JSON.parse(text);
-            }
-            
-            async function animateStat(statName, finalValue) {
-                const duration = 2000; // Animation plus lente sur 2 secondes
-                const stepTime = 20;
-                const totalSteps = duration / stepTime;
-                const increment = finalValue / totalSteps;
-                let currentValue = 0;
-                
-                return new Promise(resolve => {
-                    const interval = setInterval(() => {
-                        currentValue += increment;
-                        if (currentValue >= finalValue) {
-                            currentValue = finalValue;
-                            clearInterval(interval);
-                            resolve();
-                        }
-                        stats[statName] = Math.round(currentValue);
-                        document.getElementById(`${statName}-slider`).value = Math.round(currentValue);
-                        document.getElementById(`${statName}-value`).textContent = Math.round(currentValue);
-                        updateChart();
-                    }, stepTime);
-                });
-            }
-
-            evaluateCharBtn.addEventListener('click', async () => {
-                const characterName = charInput.value.trim();
-                if (!characterName) {
-                    evalError.textContent = 'Veuillez entrer un nom de personnage.';
-                    evalError.classList.remove('hidden');
-                    return;
-                }
-                
-                evaluateCharBtn.disabled = true;
-                charInput.disabled = true;
-                loadingIndicator.classList.remove('hidden');
-                loadingText.textContent = 'Génération de l\'image...';
-                evalError.classList.add('hidden');
-                resultsContainer.classList.add('hidden');
-                explanationContainer.classList.add('hidden');
-                characterImageContainer.innerHTML = '';
-                
-                // Reset stats
-                Object.keys(stats).forEach(key => stats[key] = 0);
-                createSliders();
-                updateChart();
-
-                try {
-                    const imageUrl = await generateCharacterImage(characterName);
-                    const imgElement = document.createElement('img');
-                    imgElement.src = imageUrl;
-                    imgElement.alt = `Image de ${characterName}`;
-                    imgElement.className = 'max-h-full max-w-full object-contain rounded-lg';
-                    characterImageContainer.appendChild(imgElement);
-
-                    loadingText.textContent = 'Analyse en cours...';
-                    
-                    const data = await evaluateCharacterStats(characterName);
-                    
-                    if (!data.stats || !data.justifications) {
-                         throw new Error("Le format des données reçues est incorrect.");
-                    }
-                    
-                    resultsContainer.classList.remove('hidden');
-                    loadingIndicator.classList.add('hidden');
-                    
-                    const animationPromises = [];
-                    let totalScore = 0;
-                    
-                    explanationContent.innerHTML = '';
-                    for (const statName in data.stats) {
-                        if (stats.hasOwnProperty(statName)) {
-                            const finalValue = data.stats[statName];
-                            totalScore += finalValue;
-                            animationPromises.push(animateStat(statName, finalValue));
-
-                            const p = document.createElement('p');
-                            p.innerHTML = `<strong class="text-red-400 font-bold">${statName}:</strong> ${data.justifications[statName]}`;
-                            explanationContent.appendChild(p);
-                        }
-                    }
-                    
-                    explanationContainer.classList.remove('hidden');
-
-                    await Promise.all(animationPromises);
-                    
-                    const averageScore = Math.round(totalScore / Object.keys(data.stats).length);
-                    generalScoreEl.textContent = averageScore;
-                    generalScoreContainer.classList.remove('hidden');
-
-
-                } catch (error) {
-                    console.error("Error during character evaluation:", error);
-                    let userMessage = "Impossible d'évaluer ce personnage. Essayez-en un autre.";
-                    
-                    if (error.message.includes("API key not valid")) {
-                        userMessage = "Votre clé API n'est pas valide. Veuillez la vérifier sur Google AI Studio et vous assurer qu'elle est correcte dans le code.";
-                    } else if (error.message.includes("API permission denied") || error.message.includes("API error: 403")) {
-                        userMessage = "Erreur d'autorisation (403). Vérifiez que l'API 'Generative Language' est bien activée pour votre projet Google Cloud.";
-                    } else if (error.message.includes("Billing issue") || error.message.includes("API error: 400")) {
-                        userMessage = "Erreur de requête (400). Assurez-vous que la facturation est bien activée pour votre projet Google Cloud. C'est souvent la cause de cette erreur.";
-                    } else if (error.message.includes("API error: 429")) {
-                        userMessage = "Trop de requêtes ont été envoyées. Veuillez patienter un moment avant de réessayer.";
-                    }
-
-                    evalError.textContent = userMessage;
-                    evalError.classList.remove('hidden');
-                } finally {
-                    evaluateCharBtn.disabled = false;
-                    charInput.disabled = false;
-                    loadingIndicator.classList.add('hidden');
-                }
-            });
-
-            // Initial setup
-            createSliders();
         });
     </script>
 </body>
