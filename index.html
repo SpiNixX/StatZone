@@ -1,8 +1,3 @@
-
-
-
-
-<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -365,7 +360,7 @@
             async function generateCharacterImage(characterName) {
                 const prompt = `Photorealistic, highly detailed portrait of ${characterName} from pop culture, cinematic lighting, epic, facing forward.`;
                 const payload = { instances: [{ prompt: prompt }], parameters: { "sampleCount": 1} };
-                const apiKey = "AIzaSyBx6GpN6MsHjrQ8Cvsp6bNpDuoHyQtczbQ"; 
+                const apiKey = "AIzaSyAv3h5jeo_Pa6DHI3OGZwedeQGtbzH7EpU"; 
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
                 
                 try {
@@ -444,24 +439,7 @@ Applique cette logique à TOUS les attributs pour que la comparaison entre un pe
 
                 try {
                     const response = await fetchWithRetry(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                    if (!response.ok) {
-                        const errorBody = await response.json().catch(() => ({}));
-                        const errorMessage = errorBody?.error?.message || `API error: ${response.status}`;
-                        
-                        console.error("API Response Error:", errorMessage);
-
-                        if (errorMessage.includes("API key not valid")) {
-                           throw new Error("API key not valid");
-                        }
-                         if (errorMessage.includes("permission to access")) {
-                           throw new Error("API permission denied");
-                        }
-                        if (response.status === 400 && errorMessage.includes("billing account")) {
-                            throw new Error("Billing issue");
-                        }
-                        
-                        throw new Error(`API error: ${response.status}`);
-                    }
+                    if (!response.ok) throw new Error(`API error: ${response.status}`);
                     
                     const result = await response.json();
                     const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -484,19 +462,7 @@ Applique cette logique à TOUS les attributs pour que la comparaison entre un pe
 
                 } catch (error) {
                     console.error("Error calling Gemini API for evaluation:", error);
-                    let userMessage = "Impossible d'évaluer ce personnage. Essayez-en un autre.";
-                    
-                    if (error.message.includes("API key not valid")) {
-                        userMessage = "Votre clé API n'est pas valide. Veuillez la vérifier sur Google AI Studio et vous assurer qu'elle est correcte dans le code.";
-                    } else if (error.message.includes("API permission denied") || error.message.includes("API error: 403")) {
-                        userMessage = "Erreur d'autorisation (403). Vérifiez que l'API 'Generative Language' est bien activée pour votre projet Google Cloud.";
-                    } else if (error.message.includes("Billing issue") || error.message.includes("API error: 400")) {
-                        userMessage = "Erreur de requête (400). Assurez-vous que la facturation est bien activée pour votre projet Google Cloud. C'est souvent la cause de cette erreur.";
-                    } else if (error.message.includes("API error: 429")) {
-                        userMessage = "Trop de requêtes ont été envoyées. Veuillez patienter un moment avant de réessayer.";
-                    }
-
-                    evalError.textContent = userMessage;
+                    evalError.textContent = "Impossible d'évaluer ce personnage. Essayez-en un autre.";
                     evalError.classList.remove('hidden');
                 } finally {
                     evaluateCharBtn.disabled = false;
@@ -602,4 +568,7 @@ Applique cette logique à TOUS les attributs pour que la comparaison entre un pe
     </script>
 </body>
 </html>
+
+
+
 
